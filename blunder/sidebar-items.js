@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Blunder","Generic af struct for errror handling Designed to host anything that implements error::Error trait Yet can host whatever (like errno from libc)"]]});
