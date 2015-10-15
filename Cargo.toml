@@ -1,0 +1,8 @@
+[package]
+name = "blunder"
+version = "0.1.1"
+authors = ["Andrey Cherkashin <with.out@me.com>"]
+
+description = "Dumb crate to make error handling easy"
+license = "BSD-2-Clause"
+keywords = ["errors"]
