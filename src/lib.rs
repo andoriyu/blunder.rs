@@ -1,7 +1,19 @@
+#![doc(html_root_url = "https://andoriyu.github.io/blunder.rs/")]
+#[macro_use] extern crate enum_primitive;
+extern crate num;
+
+extern crate errno;
+
 use std::error::Error as StdError;
 use std::fmt;
 use std::result::Result;
 use std::ops::Deref;
+
+
+mod bsd;
+
+pub use bsd::*;
+
 
 #[derive(Debug)]
 /// Generic af struct for errror handling

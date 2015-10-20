@@ -1,8 +1,15 @@
 [package]
 name = "blunder"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Andrey Cherkashin <with.out@me.com>"]
 
 description = "Dumb crate to make error handling easy"
 license = "BSD-2-Clause"
 keywords = ["errors"]
+repository = "https://github.com/andoriyu/blunder.rs"
+homepage = "https://andoriyu.github.io/blunder.rs/"
+
+[dependencies]
+errno = "0.1.4"
+enum_primitive = "0.1.0"
+num = "0.1.27"
