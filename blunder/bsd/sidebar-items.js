@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["BsdError","Errors that can be encoutered while working with FreeBSD's libc. Some of them are BSD specific, some of them are from POSIX."]]});

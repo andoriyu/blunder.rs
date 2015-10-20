@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="Source to the Rust file `src/bsd.rs`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang">
+
+    <title>bsd.rs.html -- source</title>
+
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+<span id="2">  2</span>
+<span id="3">  3</span>
+<span id="4">  4</span>
+<span id="5">  5</span>
+<span id="6">  6</span>
+<span id="7">  7</span>
+<span id="8">  8</span>
+<span id="9">  9</span>
+<span id="10"> 10</span>
+<span id="11"> 11</span>
+<span id="12"> 12</span>
+<span id="13"> 13</span>
+<span id="14"> 14</span>
+<span id="15"> 15</span>
+<span id="16"> 16</span>
+<span id="17"> 17</span>
+<span id="18"> 18</span>
+<span id="19"> 19</span>
+<span id="20"> 20</span>
+<span id="21"> 21</span>
+<span id="22"> 22</span>
+<span id="23"> 23</span>
+<span id="24"> 24</span>
+<span id="25"> 25</span>
+<span id="26"> 26</span>
+<span id="27"> 27</span>
+<span id="28"> 28</span>
+<span id="29"> 29</span>
+<span id="30"> 30</span>
+<span id="31"> 31</span>
+<span id="32"> 32</span>
+<span id="33"> 33</span>
+<span id="34"> 34</span>
+<span id="35"> 35</span>
+<span id="36"> 36</span>
+<span id="37"> 37</span>
+<span id="38"> 38</span>
+<span id="39"> 39</span>
+<span id="40"> 40</span>
+<span id="41"> 41</span>
+<span id="42"> 42</span>
+<span id="43"> 43</span>
+<span id="44"> 44</span>
+<span id="45"> 45</span>
+<span id="46"> 46</span>
+<span id="47"> 47</span>
+<span id="48"> 48</span>
+<span id="49"> 49</span>
+<span id="50"> 50</span>
+<span id="51"> 51</span>
+<span id="52"> 52</span>
+<span id="53"> 53</span>
+<span id="54"> 54</span>
+<span id="55"> 55</span>
+<span id="56"> 56</span>
+<span id="57"> 57</span>
+<span id="58"> 58</span>
+<span id="59"> 59</span>
+<span id="60"> 60</span>
+<span id="61"> 61</span>
+<span id="62"> 62</span>
+<span id="63"> 63</span>
+<span id="64"> 64</span>
+<span id="65"> 65</span>
+<span id="66"> 66</span>
+<span id="67"> 67</span>
+<span id="68"> 68</span>
+<span id="69"> 69</span>
+<span id="70"> 70</span>
+<span id="71"> 71</span>
+<span id="72"> 72</span>
+<span id="73"> 73</span>
+<span id="74"> 74</span>
+<span id="75"> 75</span>
+<span id="76"> 76</span>
+<span id="77"> 77</span>
+<span id="78"> 78</span>
+<span id="79"> 79</span>
+<span id="80"> 80</span>
+<span id="81"> 81</span>
+<span id="82"> 82</span>
+<span id="83"> 83</span>
+<span id="84"> 84</span>
+<span id="85"> 85</span>
+<span id="86"> 86</span>
+<span id="87"> 87</span>
+<span id="88"> 88</span>
+<span id="89"> 89</span>
+<span id="90"> 90</span>
+<span id="91"> 91</span>
+<span id="92"> 92</span>
+<span id="93"> 93</span>
+<span id="94"> 94</span>
+<span id="95"> 95</span>
+<span id="96"> 96</span>
+<span id="97"> 97</span>
+<span id="98"> 98</span>
+<span id="99"> 99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+</pre><pre class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>error</span>::<span class='ident'>Error</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>::{<span class='ident'>Display</span>,<span class='ident'>Formatter</span>,<span class='prelude-ty'>Result</span>};
+<span class='kw'>use</span> <span class='ident'>num</span>::<span class='ident'>FromPrimitive</span>;
+<span class='kw'>use</span> <span class='ident'>errno</span>::<span class='ident'>errno</span>;
+
+<span class='macro'>enum_from_primitive</span><span class='macro'>!</span> {
+    <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>PartialEq</span>)]</span>
+    <span class='doccomment'>/// Errors that can be encoutered while working with FreeBSD&#39;s libc.</span>
+    <span class='doccomment'>/// Some of them are BSD specific, some of them are from POSIX.</span>
+    <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>BsdError</span> {
+        <span class='ident'>EPERM</span><span class='op'>=</span>      <span class='number'>1</span>,  <span class='ident'>ENOENT</span>, <span class='ident'>ESRCH</span>, <span class='ident'>EINTR</span>, <span class='ident'>EIO</span>, <span class='ident'>ENXIO</span>, <span class='ident'>E2BIG</span>, <span class='ident'>ENOEXEC</span>, <span class='ident'>EBADF</span>,
+        <span class='ident'>ECHILD</span><span class='op'>=</span>     <span class='number'>10</span>, <span class='ident'>EDEADLK</span>, <span class='ident'>ENOMEM</span>, <span class='ident'>EACCES</span>, <span class='ident'>EFAULT</span>, <span class='ident'>ENOTBLK</span>, <span class='ident'>EBUSY</span>, <span class='ident'>EEXIST</span>, <span class='ident'>EXDEV</span>, <span class='ident'>ENODEV</span>,
+        <span class='ident'>ENOTDIR</span><span class='op'>=</span>    <span class='number'>20</span>, <span class='ident'>EISDIR</span>, <span class='ident'>EINVAL</span>, <span class='ident'>ENFILE</span>, <span class='ident'>EMFILE</span>, <span class='ident'>ENOTTY</span>, <span class='ident'>ETXTBSY</span>, <span class='ident'>EFBIG</span>, <span class='ident'>ENOSPC</span>, <span class='ident'>ESPIPE</span>,
+        <span class='ident'>EROFS</span><span class='op'>=</span>      <span class='number'>30</span>, <span class='ident'>EMLINK</span>, <span class='ident'>EPIPE</span>, <span class='ident'>EDOM</span>, <span class='ident'>ERANGE</span>, <span class='ident'>EAGAIN</span>, <span class='ident'>EINPROGRESS</span>, <span class='ident'>EALREADY</span>, <span class='ident'>ENOTSOCK</span>, <span class='ident'>EDESTADDRREQ</span>,
+        <span class='ident'>EMSGSIZE</span><span class='op'>=</span>   <span class='number'>40</span>, <span class='ident'>EPROTOTYPE</span>, <span class='ident'>ENOPROTOOPT</span>, <span class='ident'>EPROTONOSUPPORT</span>, <span class='ident'>ESOCKTNOSUPPORT</span>, <span class='ident'>EOPNOTSUPP</span>, <span class='ident'>EPFNOSUPPORT</span>, <span class='ident'>EAFNOSUPPORT</span>, <span class='ident'>EADDRINUSE</span>, <span class='ident'>EADDRNOTAVAIL</span>,
+        <span class='ident'>ENETDOWN</span><span class='op'>=</span>   <span class='number'>50</span>, <span class='ident'>ENETUNREACH</span>, <span class='ident'>ENETRESET</span>, <span class='ident'>ECONNABORTED</span>, <span class='ident'>ECONNRESET</span>, <span class='ident'>ENOBUFS</span>, <span class='ident'>EISCONN</span>, <span class='ident'>ENOTCONN</span>, <span class='ident'>ESHUTDOWN</span>,
+        <span class='ident'>ETIMEDOUT</span><span class='op'>=</span>  <span class='number'>60</span>, <span class='ident'>ECONNREFUSED</span>, <span class='ident'>ELOOP</span>, <span class='ident'>ENAMETOOLONG</span>, <span class='ident'>EHOSTDOWN</span>, <span class='ident'>EHOSTUNREACH</span>, <span class='ident'>ENOTEMPTY</span>, <span class='ident'>EPROCLIM</span>, <span class='ident'>EUSERS</span>, <span class='ident'>EDQUOT</span>,
+        <span class='ident'>ESTALE</span><span class='op'>=</span>     <span class='number'>70</span>, <span class='ident'>EBADRPC</span>, <span class='ident'>ERPCMISMATCH</span>, <span class='ident'>EPROGUNAVAIL</span>, <span class='ident'>EPROGMISMATCH</span>, <span class='ident'>EPROCUNAVAIL</span>, <span class='ident'>ENOLCK</span>, <span class='ident'>ENOSYS</span>, <span class='ident'>EFTYPE</span>,
+        <span class='ident'>EAUTH</span><span class='op'>=</span>      <span class='number'>80</span>, <span class='ident'>ENEEDAUTH</span>, <span class='ident'>EIDRM</span>, <span class='ident'>ENOMSG</span>, <span class='ident'>EOVERFLOW</span>, <span class='ident'>ECANCELED</span>, <span class='ident'>EILSEQ</span>, <span class='ident'>ENOATTR</span>, <span class='ident'>EDOOFUS</span>, <span class='ident'>EBADMSG</span>,
+        <span class='ident'>EMULTIHOP</span><span class='op'>=</span>  <span class='number'>90</span>, <span class='ident'>ENOLINK</span>, <span class='ident'>EPROTO</span>, <span class='ident'>ENOTCAPABLE</span>, <span class='ident'>ECAPMODE</span>, <span class='ident'>ENOTRECOVERABLE</span>, <span class='ident'>EOWNERDEAD</span>
+
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>BsdError</span> {
+    <span class='doccomment'>/// Create BsdError from errno in current thread. Returns None of error is not known or there is no error at all.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_errno</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>BsdError</span><span class='op'>&gt;</span> {
+        <span class='kw'>let</span> <span class='ident'>e</span> <span class='op'>=</span> <span class='ident'>errno</span>();
+        <span class='ident'>BsdError</span>::<span class='ident'>from_i32</span>(<span class='ident'>e</span>.<span class='number'>0</span> <span class='kw'>as</span> <span class='ident'>i32</span>)
+    }
+}
+<span class='kw'>impl</span> <span class='ident'>Error</span> <span class='kw'>for</span> <span class='ident'>BsdError</span> {
+    <span class='kw'>fn</span> <span class='ident'>description</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> {
+        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
+            <span class='ident'>BsdError</span>::<span class='ident'>EPERM</span>             <span class='op'>=&gt;</span> <span class='string'>&quot;Operation not permitted. An attempt was made to perform an operation limited to processes with appropriate privileges or to the owner of a file or other resources.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOENT</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;No such file or directory. A component of a specified pathname did not exist, or the pathname was an empty string.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ESRCH</span>             <span class='op'>=&gt;</span> <span class='string'>&quot;No such process. No process could be found corresponsing to that specified by the given ID.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EINTR</span>             <span class='op'>=&gt;</span> <span class='string'>&quot;Interrupted system call. An asynchronous signal (such as SIGINT or SIGQUIT) was caught by the process during the execution of an interruptible function. If the signal handler performs a normal return, the interrupted system call will seem to have returned the error condition.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EIO</span>               <span class='op'>=&gt;</span> <span class='string'>&quot;Input/output error. Some physical input or output error occurred. This error will not be reported until a subsequent operation on the same file descriptor and may be lost (over written) by any subsequent errors.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENXIO</span>             <span class='op'>=&gt;</span> <span class='string'>&quot;Device not configured. Input or output on a special file referred to a device that did not exist, or made a request beyond the limits of the device.  This error may also occur when, for example, a tape drive is not online or no disk pack is loaded on a drive&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>E2BIG</span>             <span class='op'>=&gt;</span> <span class='string'>&quot;Argument list too long. The number of bytes used for the argument and environment list of the new process exceeded the current limit (NCARGS in &lt;sys/param.h&gt;).&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOEXEC</span>           <span class='op'>=&gt;</span> <span class='string'>&quot;Exec format error. A request was made to execute a file that, although it has the appropriate permissions, was not in the format required for an executable file.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EBADF</span>             <span class='op'>=&gt;</span> <span class='string'>&quot;Bad file descriptor. A file descriptor argument was out of range, referred to no open file, or a read (write) request was made to a file that was only open for writing (reading).&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ECHILD</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;No child processes. A wait(2) or waitpid(2) function was executed by a process that had no existing or unwaited-for child processes.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EDEADLK</span>           <span class='op'>=&gt;</span> <span class='string'>&quot;Resource deadlock avoided. An attempt was made to lock a system resource that would have resulted in a deadlock situation.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOMEM</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Cannot allocate memory. The new process image required more memory than was allowed by the hardware or by system-imposed memory management constraints. A lack of swap space is normally temporary; however, a lack of core is not.  Soft limits may be increased to their corresponding hard limits.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EACCES</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Permission denied. An attempt was made to access a file in a way forbidden by its file access permissions.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EFAULT</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Bad address. The system detected an invalid address in attempting to use an argument of a call.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOTBLK</span>           <span class='op'>=&gt;</span> <span class='string'>&quot;Block device required. A block device operation was attempted on a non-block device or file.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EBUSY</span>             <span class='op'>=&gt;</span> <span class='string'>&quot;Device busy. An attempt to use a system resource which was in use at the time in a manner which would have conflicted with the request&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EEXIST</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;File exists. An existing file was mentioned in an inappropriate context, for instance, as the new link name in a link(2) system call&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EXDEV</span>             <span class='op'>=&gt;</span> <span class='string'>&quot;Cross-device link. A hard link to a file on another file system was attempted.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENODEV</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Operation not supported by device. An attempt was made to apply an inappropriate function to a device, for example, trying to read a write-only device such as a printer.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOTDIR</span>           <span class='op'>=&gt;</span> <span class='string'>&quot;Not a directory. A component of the specified pathname existed, but it was not a directory, when a directory was expected.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EISDIR</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Is a directory. An attempt was made to open a directory with write mode specified.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EINVAL</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Invalid argument. Some invalid argument was supplied. (For example, specifying an undefined signal to a signal(3) function or a kill(2) system call).&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENFILE</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Too many open files in system. Maximum number of open files allowable on the system has been reached and requests for an open cannot be satisfied until at least one has been closed.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EMFILE</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Too many open files. Maximum number of file descriptors allowable in the process has been reached and requests for an open cannot be satisfied until at least one has been closed. The getdtablesize(2) system call will obtain the current limit.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOTTY</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Inappropriate ioctl for device. A control function (see ioctl(2)) was attempted for a file or special device for which the operation was inappropriate.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ETXTBSY</span>           <span class='op'>=&gt;</span> <span class='string'>&quot;Text file busy. The new process was a pure procedure (shared text) file which was open for writing by another process, or while the pure procedure file was being executed an open(2) call requested write access.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EFBIG</span>             <span class='op'>=&gt;</span> <span class='string'>&quot;File too large. The size of a file exceeded the maximum.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOSPC</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;No space left on device. A write(2) to an ordinary file, the creation of a directory or symbolic link, or the creation of a directory entry failed because no more disk blocks were available on the file system, or the allocation of an inode for a newly created file failed because no more inodes were available on the file system.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ESPIPE</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Illegal seek. An lseek(2) system call was issued on a socket, pipe or FIFO.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EROFS</span>             <span class='op'>=&gt;</span> <span class='string'>&quot;Read-only file system. An attempt was made to modify a file or directory on a file system that was read-only at the time.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EMLINK</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Too many links. Maximum allowable hard links to a single file has been exceeded (limit of 32767 hard links per file).&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EPIPE</span>             <span class='op'>=&gt;</span> <span class='string'>&quot;Broken pipe. A write on a pipe, socket or FIFO for which there is no process to read the data.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EDOM</span>              <span class='op'>=&gt;</span> <span class='string'>&quot;Numerical argument out of domain. A numerical input argument was outside the defined domain of the mathematical function.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ERANGE</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Result too large. A numerical result of the function was too large to fit in the available space (perhaps exceeded precision).&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EAGAIN</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Resource temporarily unavailable. This is a temporary condition and later calls to the same routine may complete normally.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EINPROGRESS</span>       <span class='op'>=&gt;</span> <span class='string'>&quot;Operation now in progress. An operation that takes a long time to complete (such as a connect(2)) was attempted on a non-blocking object (see fcntl(2)).&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EALREADY</span>          <span class='op'>=&gt;</span> <span class='string'>&quot;Operation already in progress. An operation was attempted on a non-blocking object that already had an operation in progress.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOTSOCK</span>          <span class='op'>=&gt;</span> <span class='string'>&quot;Socket operation on non-socket. Self-explanatory.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EDESTADDRREQ</span>      <span class='op'>=&gt;</span> <span class='string'>&quot;Destination address required. A required address was omitted from an operation on a socket.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EMSGSIZE</span>          <span class='op'>=&gt;</span> <span class='string'>&quot;Message too long. A message sent on a socket was larger than the internal message buffer or some other network limit.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EPROTOTYPE</span>        <span class='op'>=&gt;</span> <span class='string'>&quot;Protocol wrong type for socket. A protocol was specified that does not support the semantics of the socket type requested. For example, you cannot use the ARPA Internet UDP protocol with type SOCK_STREAM.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOPROTOOPT</span>       <span class='op'>=&gt;</span> <span class='string'>&quot;Protocol not available. A bad option or level was specified in a getsockopt(2) or setsockopt(2) call.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EPROTONOSUPPORT</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;Protocol not supported. The protocol has not been configured into the system or no implementation for it exists.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ESOCKTNOSUPPORT</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;Socket type not supported. The support for the socket type has not been configured into the system or no implementation for it exists.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EOPNOTSUPP</span>        <span class='op'>=&gt;</span> <span class='string'>&quot;Operation not supported. The attempted operation is not supported for the type of object referenced. Usually this occurs when a file descriptor refers to a file or socket that cannot support this operation, for example, trying to accept a connection on a datagram socket.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EPFNOSUPPORT</span>      <span class='op'>=&gt;</span> <span class='string'>&quot;Protocol family not supported. The protocol family has not been configured into the system or no implementation for it exists.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EAFNOSUPPORT</span>      <span class='op'>=&gt;</span> <span class='string'>&quot;Address family not  supported by protocol family. An address incompatible with the requested protocol was used. For example, you should not necessarily expect to be able to use NS addresses with ARPA Internet protocols.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EADDRINUSE</span>        <span class='op'>=&gt;</span> <span class='string'>&quot;Address already in use. Only one usage of each address is normally permitted.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EADDRNOTAVAIL</span>     <span class='op'>=&gt;</span> <span class='string'>&quot;Can&#39;t assign requested address. Normally results from an attempt to create a socket with an address not on this machine.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENETDOWN</span>          <span class='op'>=&gt;</span> <span class='string'>&quot;Network is down. A socket operation encountered a dead network.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENETUNREACH</span>       <span class='op'>=&gt;</span> <span class='string'>&quot;Network is unreachable. A socket operation was attempted to an unreachable network.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENETRESET</span>         <span class='op'>=&gt;</span> <span class='string'>&quot;Network dropped connection on reset. The host you were connected to crashed and rebooted.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ECONNABORTED</span>      <span class='op'>=&gt;</span> <span class='string'>&quot;Software caused connectionabort. A connection abort was caused internal to your host machine.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ECONNRESET</span>        <span class='op'>=&gt;</span> <span class='string'>&quot;Connection reset by peer. A connection was forcibly closed by a peer. This normally results from a loss of the connection on the remote socket due to a timeout or a reboot.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOBUFS</span>           <span class='op'>=&gt;</span> <span class='string'>&quot;No buffer space available. An operation on a socket or pipe was not performed because the system lacked sufficient buffer space or because a queue was full.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EISCONN</span>           <span class='op'>=&gt;</span> <span class='string'>&quot;Socket is already connected. A connect(2) request was made on an already connected socket; or, a sendto(2) or sendmsg(2) request on a connected socket specified a destination when already connected.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOTCONN</span>          <span class='op'>=&gt;</span> <span class='string'>&quot;Socket  is not connected. An request to send or receive data was disallowed because the socket was not connected and (when sending on a datagram socket) no address was supplied.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ESHUTDOWN</span>         <span class='op'>=&gt;</span> <span class='string'>&quot;Can&#39;t send after socket shutdown. A request to send data was disallowed because the socket had already been shut down with a previous shutdown(2) call.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ETIMEDOUT</span>         <span class='op'>=&gt;</span> <span class='string'>&quot;Operation timed out. A connect(2) or send(2) request failed because the connected party did not properly respond after a period of time.  (The timeout period is dependent on the communication protocol.)&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ECONNREFUSED</span>      <span class='op'>=&gt;</span> <span class='string'>&quot;Connection refused. No connection could be made because the target machine actively refused it.  This usually results from trying to connect to a service that is inactive on the foreign host.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ELOOP</span>             <span class='op'>=&gt;</span> <span class='string'>&quot;Too many levels of symbolic links. A path name lookup involved more than 32 (MAXSYMLINKS) symbolic links.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENAMETOOLONG</span>      <span class='op'>=&gt;</span> <span class='string'>&quot;File name too long. A component of a path name exceeded {NAME_MAX} characters, or an entire path name exceeded {PATH_MAX} characters.(See also the description of _PC_NO_TRUNC in pathconf(2).)&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EHOSTDOWN</span>         <span class='op'>=&gt;</span> <span class='string'>&quot;Host is down. A socket operation failed because the destination host was down.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EHOSTUNREACH</span>      <span class='op'>=&gt;</span> <span class='string'>&quot;No route to host. A socket operation was attempted to an unreachable host.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOTEMPTY</span>         <span class='op'>=&gt;</span> <span class='string'>&quot;Directory not empty. A directory with entries other than `.&#39; and `..&#39; was supplied to a remove directory or rename call.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EPROCLIM</span>          <span class='op'>=&gt;</span> <span class='string'>&quot;Too many processes.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EUSERS</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Too many users. The quota system ran out of table entries.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EDQUOT</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Disc quota exceeded. A write(2) to an ordinary file, the creation of a directory or symbolic link, or the creation of a directory entry failed because the user&#39;s quota of disk blocks was exhausted, or the allocation of an inode for a newly created file failed because the user&#39;s quota of inodes was exhausted.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ESTALE</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Stale NFS file handle. An attempt was made to access an open file (on an NFS file system) which is now unavailable as referenced by the file descriptor.  This may indicate the file was deleted on the NFS server or some other catastrophic event occurred.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EBADRPC</span>           <span class='op'>=&gt;</span> <span class='string'>&quot;RPC struct is bad. Exchange of RPC information was unsuccessful.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ERPCMISMATCH</span>      <span class='op'>=&gt;</span> <span class='string'>&quot;RPC version wrong. The version of RPC on the remote peer is not compatible with the local version.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EPROGUNAVAIL</span>      <span class='op'>=&gt;</span> <span class='string'>&quot;RPC prog. not avail. The requested program is not  registered on the remote host.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EPROGMISMATCH</span>     <span class='op'>=&gt;</span> <span class='string'>&quot;Program version wrong. The requested version of the program is not available on the remote host (RPC).&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EPROCUNAVAIL</span>      <span class='op'>=&gt;</span> <span class='string'>&quot;Bad procedure for program. An RPC call was attempted for a procedure which does not exist in the remote program.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOLCK</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;No locks available. A system-imposed limit on the number of simultaneous file locks was reached.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOSYS</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Function not implemented. Attempted a system call that is not available on this system.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EFTYPE</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Inappropriate file type or format. The file was the wrong type for the operation, or a data file had the wrong format.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EAUTH</span>             <span class='op'>=&gt;</span> <span class='string'>&quot;Authentication error. Attempted to use an invalid authentication ticket to mount a NFS file system.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENEEDAUTH</span>         <span class='op'>=&gt;</span> <span class='string'>&quot;Need authenticator. An authentication ticket must be obtained before the given NFS file system may be mounted.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EIDRM</span>             <span class='op'>=&gt;</span> <span class='string'>&quot;Identifier removed. An IPC identifier was removed while the current process was waiting on it.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOMSG</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;No message of desired type. An IPC message queue does not contain a message of the desired type, or a message catalog does not contain the requested message.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EOVERFLOW</span>         <span class='op'>=&gt;</span> <span class='string'>&quot;Value too large to be stored in data type. A numerical result of the function was too large to be stored in the caller provided space.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ECANCELED</span>         <span class='op'>=&gt;</span> <span class='string'>&quot;Operation canceled. The scheduled operation was canceled.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EILSEQ</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Illegal byte sequence.  While decoding a multibyte character the function came along an invalid or an incomplete sequence of bytes or the given wide character is invalid.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOATTR</span>           <span class='op'>=&gt;</span> <span class='string'>&quot;Attribute not found. The specified extended attribute does not exist.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EDOOFUS</span>           <span class='op'>=&gt;</span> <span class='string'>&quot;Programming error. A function or API is being abused in a way which could only be detected at run-time.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EBADMSG</span>           <span class='op'>=&gt;</span> <span class='string'>&quot;Bad message. A corrupted message was detected.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EMULTIHOP</span>         <span class='op'>=&gt;</span> <span class='string'>&quot;Multihop attempted. This error code is unused, but present for compatibility with other systems.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOLINK</span>           <span class='op'>=&gt;</span> <span class='string'>&quot;Link has been severed. This error code is unused, but present for compatibility with other systems.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EPROTO</span>            <span class='op'>=&gt;</span> <span class='string'>&quot;Protocol error. A device or socket encountered an unrecoverable protocol error.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOTCAPABLE</span>       <span class='op'>=&gt;</span> <span class='string'>&quot;Capabilities insufficient. An operation on a capability file descriptor requires greater privilege than the capability allows.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ECAPMODE</span>          <span class='op'>=&gt;</span> <span class='string'>&quot;Not permitted in capability mode. The system call or operation is not permitted for capability mode processes.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>ENOTRECOVERABLE</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;State not recoverable. The state protected by a robust mutex is not recoverable.&quot;</span>,
+            <span class='ident'>BsdError</span>::<span class='ident'>EOWNERDEAD</span>        <span class='op'>=&gt;</span> <span class='string'>&quot;Previous owner died. The owner of a robust mutex terminated while holding the mutex lock.&quot;</span>
+        }
+    }
+    <span class='kw'>fn</span> <span class='ident'>cause</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>Error</span><span class='op'>&gt;</span> {
+        <span class='prelude-val'>None</span>
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>BsdError</span> {
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span> {
+        <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>,<span class='string'>&quot;{}: {}&quot;</span>, <span class='self'>self</span>, <span class='self'>self</span>.<span class='ident'>description</span>())
+    }
+}
+
+
+<span class='attribute'>#[<span class='ident'>test</span>]</span>
+<span class='kw'>fn</span> <span class='ident'>bsd_error</span>() {
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>BsdError</span>::<span class='ident'>from_i32</span>(<span class='number'>1</span>), <span class='prelude-val'>Some</span>(<span class='ident'>BsdError</span>::<span class='ident'>EPERM</span>));
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>BsdError</span>::<span class='ident'>from_errno</span>(), <span class='prelude-val'>None</span>);
+}
+</pre>
+</section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "blunder";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

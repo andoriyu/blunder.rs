@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Blunder","Generic af struct for errror handling Designed to host anything that implements error::Error trait Yet can host whatever (like errno from libc)"]]});
+initSidebarItems({"enum":[["BsdError","Errors that can be encoutered while working with FreeBSD's libc. Some of them are BSD specific, some of them are from POSIX."]],"struct":[["Blunder","Generic af struct for errror handling Designed to host anything that implements error::Error trait Yet can host whatever (like errno from libc)"]]});
