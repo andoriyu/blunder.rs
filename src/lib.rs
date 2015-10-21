@@ -14,11 +14,28 @@ mod bsd;
 
 pub use bsd::*;
 
+/// Macro helper to propagate an error
+#[macro_export]
+macro_rules! fail {
+    ($expr:expr) => (
+        return Err(::std::error::FromError::from_error($expr));
+        )
+}
 
-#[derive(Debug)]
+/// Macro helper to propagate an error if there is one. See BsdError::from_errno() for inpsiration.
+#[macro_export]
+macro_rules! maybe_fail {
+    ($expr:expr) => ({
+        if let Some(err) = $expr {
+            fail!(err)
+        }
+    })
+}
+
 /// Generic af struct for errror handling
 /// Designed to host anything that implements error::Error trait
 /// Yet can host whatever (like errno from libc)
+#[derive(Debug)]
 pub struct Blunder<T> {
     /// How to identify the error
     kind: T,
