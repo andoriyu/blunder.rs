@@ -9,6 +9,7 @@
 
     <title>blunder - Rust</title>
 
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
 
     
@@ -24,10 +25,10 @@
 
     
 
-    <section class="sidebar">
+    <nav class="sidebar">
         
         <p class='location'></p><script>window.sidebarCurrent = {name: 'blunder', ty: 'mod', relpath: '../'};</script>
-    </section>
+    </nav>
 
     <nav class="sub">
         <form class="search-form js-only">
@@ -45,15 +46,14 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-0' class='srclink' href='../src/blunder/lib.rs.html#1-99' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-0' class='srclink' href='../src/blunder/lib.rs.html#1-117' title='goto source code'>[src]</a></span></h1>
 <h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
 <table>
                     <tr class=' module-item'>
                         <td><a class='macro' href='macro.fail!.html'
                                title='blunder::fail!'>fail!</a></td>
                         <td class='docblock short'>
-                             <p>Macro helper to propagate an error</p>
-
+                             
                         </td>
                     </tr>
                 
@@ -93,10 +93,12 @@ Some of them are BSD specific, some of them are from POSIX.</p>
 
     <section class="footer"></section>
 
-    <div id="help" class="hidden">
+    <aside id="help" class="hidden">
         <div>
+            <h1 class="hidden">Help</h1>
+
             <div class="shortcuts">
-                <h1>Keyboard Shortcuts</h1>
+                <h2>Keyboard Shortcuts</h2>
 
                 <dl>
                     <dt>?</dt>
@@ -113,7 +115,7 @@ Some of them are BSD specific, some of them are from POSIX.</p>
             </div>
 
             <div class="infos">
-                <h1>Search Tricks</h1>
+                <h2>Search Tricks</h2>
 
                 <p>
                     Prefix searches with a type followed by a colon (e.g.
@@ -123,8 +125,8 @@ Some of them are BSD specific, some of them are from POSIX.</p>
                 <p>
                     Accepted types are: <code>fn</code>, <code>mod</code>,
                     <code>struct</code>, <code>enum</code>,
-                    <code>trait</code>, <code>typedef</code> (or
-                    <code>tdef</code>).
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
                 </p>
 
                 <p>
@@ -133,7 +135,7 @@ Some of them are BSD specific, some of them are from POSIX.</p>
                 </p>
             </div>
         </div>
-    </div>
+    </aside>
 
     
 
@@ -145,6 +147,6 @@ Some of them are BSD specific, some of them are from POSIX.</p>
     <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     
-    <script async src="../search-index.js"></script>
+    <script defer src="../search-index.js"></script>
 </body>
 </html>

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["POST_DROP_U32",""],["POST_DROP_U64",""],["POST_DROP_U8",""],["POST_DROP_USIZE",""]],"fn":[["align_of",""],["align_of_val",""],["drop",""],["dropped",""],["forget",""],["min_align_of",""],["min_align_of_val",""],["replace",""],["size_of",""],["size_of_val",""],["swap",""],["transmute",""],["transmute_copy",""],["uninitialized",""],["zeroed",""]]});
