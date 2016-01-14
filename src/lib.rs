@@ -6,7 +6,6 @@ extern crate errno;
 
 use std::error::Error as StdError;
 use std::fmt;
-use std::result::Result;
 use std::ops::Deref;
 use std::convert::From;
 
@@ -18,7 +17,7 @@ pub use bsd::*;
 #[macro_export]
 macro_rules! fail {
     ($expr:expr) => (
-        return Result::Err(::std::convert::From::from($expr));
+        return ::std::result::Result::Err(::std::convert::From::from($expr));
         )
 }
 
