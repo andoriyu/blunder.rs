@@ -11,6 +11,6 @@ documentation = "https://andoriyu.github.io/blunder.rs/"
 homepage  = "https://github.com/andoriyu/blunder.rs/"
 
 [dependencies]
-errno = "0.2.3"
-enum_primitive = "0.1.0"
-num = "0.1.27"
+errno = "0.2"
+enum_primitive = "0.1"
+num = "0.1"
