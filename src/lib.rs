@@ -7,7 +7,7 @@ extern crate errno;
 use std::error::Error as StdError;
 use std::fmt;
 use std::ops::Deref;
-use std::convert::From;
+use std::convert::{From, Into};
 
 
 mod bsd;
@@ -73,6 +73,12 @@ impl <T: StdError> fmt::Display for Blunder<T> {
 impl <E: StdError> From<E> for Blunder<E> {
     fn from(err: E) -> Blunder<E> {
         Blunder { kind: err, detail: None }
+    }
+}
+
+impl<E> Into<std::io::Error> for Blunder<E> where E: Into<std::io::Error> + StdError {
+    fn into(self) -> std::io::Error {
+    self.kind.into()
     }
 }
 
