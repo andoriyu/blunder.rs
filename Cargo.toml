@@ -1,6 +1,6 @@
 [package]
 name = "blunder"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["Andrey Cherkashin <with.out@me.com>"]
 
 description = "Dumb crate to make error handling easy"
