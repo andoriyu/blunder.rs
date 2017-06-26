@@ -5,7 +5,7 @@ use std::error::Error;
 use std::fmt::{Display, Formatter, Result};
 
 enum_from_primitive! {
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     /// Errors that can be encoutered while working with FreeBSD's libc.
     /// Some of them are BSD specific, some of them are from POSIX.
     pub enum BsdError {

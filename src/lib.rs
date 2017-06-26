@@ -37,7 +37,7 @@ macro_rules! maybe_fail {
 /// Designed to host anything that implements error::Error trait
 /// Yet can host whatever (like errno from libc)
 #[derive(Debug, PartialEq)]
-pub struct Blunder<T: StdError + Copy + Clone> {
+pub struct Blunder<T: StdError + Clone> {
     /// How to identify the error
     kind: T,
     detail: Option<String>,
@@ -51,7 +51,7 @@ impl<T: StdError + Copy + Clone> Deref for Blunder<T> {
         &self.kind
     }
 }
-impl<T: StdError + Copy + Clone> Blunder<T> {
+impl<T: StdError + Clone> Blunder<T> {
     /// Optional reasoning behind such behavior.
     /// Think "Client doesn't understand XXX cipher"
     pub fn detail(&self) -> Option<String> {
@@ -62,7 +62,7 @@ impl<T: StdError + Copy + Clone> Blunder<T> {
         self.kind.clone()
     }
 }
-impl<T: StdError + Copy + Clone> StdError for Blunder<T> {
+impl<T: StdError + Clone> StdError for Blunder<T> {
     fn description(&self) -> &str {
         self.kind.description()
     }
@@ -71,12 +71,12 @@ impl<T: StdError + Copy + Clone> StdError for Blunder<T> {
     }
 }
 
-impl<T: StdError + Copy + Clone> fmt::Display for Blunder<T> {
+impl<T: StdError + Clone> fmt::Display for Blunder<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.description())
     }
 }
-impl<E: StdError + Copy + Clone> From<E> for Blunder<E> {
+impl<E: StdError + Clone> From<E> for Blunder<E> {
     fn from(err: E) -> Blunder<E> {
         Blunder {
             kind: err,
@@ -87,7 +87,7 @@ impl<E: StdError + Copy + Clone> From<E> for Blunder<E> {
 
 #[test]
 fn it_works() {
-    #[derive(Debug, PartialEq, Copy, Clone)]
+    #[derive(Debug, PartialEq, Clone)]
     enum Wat {
         One,
     };
@@ -111,7 +111,7 @@ fn it_works() {
     };
     assert_eq!(error.cause().is_some(), false);
     assert_eq!(error.description(), "wat");
-    assert_eq!(*error, Wat::One);
+    assert_eq!(error.kind(), Wat::One);
 
     // Test fail! macro
 
