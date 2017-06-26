@@ -1,13 +1,14 @@
 #![doc(html_root_url = "https://andoriyu.github.io/blunder.rs/")]
-#[macro_use] extern crate enum_primitive;
+#[macro_use]
+extern crate enum_primitive;
 extern crate num;
 
 extern crate errno;
 
+use std::convert::From;
 use std::error::Error as StdError;
 use std::fmt;
 use std::ops::Deref;
-use std::convert::{From, Into};
 
 
 mod bsd;
@@ -21,7 +22,8 @@ macro_rules! fail {
         )
 }
 
-/// Macro helper to propagate an error if there is one. See BsdError::from_errno() for inpsiration.
+/// Macro helper to propagate an error if there is one. See
+/// BsdError::from_errno() for inpsiration.
 #[macro_export]
 macro_rules! maybe_fail {
     ($expr:expr) => ({
@@ -35,28 +37,32 @@ macro_rules! maybe_fail {
 /// Designed to host anything that implements error::Error trait
 /// Yet can host whatever (like errno from libc)
 #[derive(Debug, PartialEq)]
-pub struct Blunder<T: StdError> {
+pub struct Blunder<T: StdError + Copy + Clone> {
     /// How to identify the error
     kind: T,
-    detail: Option<String>
+    detail: Option<String>,
 }
 
 /// Because we want easy switch/case on kind...
-impl <T: StdError> Deref for Blunder<T> {
+impl<T: StdError + Copy + Clone> Deref for Blunder<T> {
     type Target = T;
 
     fn deref<'a>(&'a self) -> &'a T {
         &self.kind
     }
 }
-impl <T: StdError> Blunder<T> {
+impl<T: StdError + Copy + Clone> Blunder<T> {
     /// Optional reasoning behind such behavior.
     /// Think "Client doesn't understand XXX cipher"
     pub fn detail(&self) -> Option<String> {
         self.detail.clone()
     }
+
+    pub fn kind(&self) -> T {
+        self.kind.clone()
+    }
 }
-impl <T: StdError> StdError for Blunder<T> {
+impl<T: StdError + Copy + Clone> StdError for Blunder<T> {
     fn description(&self) -> &str {
         self.kind.description()
     }
@@ -65,32 +71,29 @@ impl <T: StdError> StdError for Blunder<T> {
     }
 }
 
-impl <T: StdError> fmt::Display for Blunder<T> {
+impl<T: StdError + Copy + Clone> fmt::Display for Blunder<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,"{}", self.description())
+        write!(f, "{}", self.description())
     }
 }
-impl <E: StdError> From<E> for Blunder<E> {
+impl<E: StdError + Copy + Clone> From<E> for Blunder<E> {
     fn from(err: E) -> Blunder<E> {
-        Blunder { kind: err, detail: None }
-    }
-}
-
-impl<E> Into<std::io::Error> for Blunder<E> where E: Into<std::io::Error> + StdError {
-    fn into(self) -> std::io::Error {
-    self.kind.into()
+        Blunder {
+            kind: err,
+            detail: None,
+        }
     }
 }
 
 #[test]
 fn it_works() {
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Copy, Clone)]
     enum Wat {
         One,
     };
     impl fmt::Display for Wat {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f,"{}", "wat")
+            write!(f, "{}", "wat")
         }
     }
     impl StdError for Wat {
@@ -102,7 +105,10 @@ fn it_works() {
         }
     }
 
-    let error: Blunder<Wat> = Blunder { kind: Wat::One, detail: None };
+    let error: Blunder<Wat> = Blunder {
+        kind: Wat::One,
+        detail: None,
+    };
     assert_eq!(error.cause().is_some(), false);
     assert_eq!(error.description(), "wat");
     assert_eq!(*error, Wat::One);
@@ -113,7 +119,10 @@ fn it_works() {
         fail!(Wat::One)
     };
 
-    let fail = Blunder { kind: Wat::One, detail: None };
+    let fail = Blunder {
+        kind: Wat::One,
+        detail: None,
+    };
     if let Err(err) = goto_fail() {
         assert_eq!(err, fail);
     } else {
